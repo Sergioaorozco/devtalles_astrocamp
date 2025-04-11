@@ -5,12 +5,18 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ params, request }) => {
   const { clientId } = params;
-  const body = {
-    method: 'GET',
-    clientId: +(clientId ?? 0)
+  const result = await db.select().from(Clients).where(eq(Clients.id, Number(clientId)));
+  if(!result.length) {
+    return new Response(
+      JSON.stringify({ error: `Client ${clientId} Not Found`}),
+      {
+        status: 404,
+        headers: { "Content-Type": "application/json"}
+      }
+    )
   }
   return new Response(
-    JSON.stringify(body),
+    JSON.stringify(result.at(0)),
     {
       status: 200,
       headers: { "Content-Type": "application/json"}
