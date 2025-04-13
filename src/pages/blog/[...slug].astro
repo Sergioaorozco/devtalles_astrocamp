@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry, getCollection } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
+import { GET } from '../api/clients/index.ts';
 import { render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -12,10 +13,36 @@ export async function getStaticPaths() {
 }
 type Props = CollectionEntry<'blog'>;
 
+export const prerender = false;
+
 const post = Astro.props;
 const { Content } = await render(post);
+
+type User = {
+	name: string;
+	// Add other fields if necessary
+};
+
+const getCurrentUsers = async(): Promise<User[]> => {
+	try {
+		const response = await GET(Astro);
+		const data = response.json();
+		return data
+	} catch (err) {
+		console.error(err);
+		return [];
+	}
+}
+
 ---
 
 <BlogPost {...post.data}>
+	<div>
+		{(await getCurrentUsers()).map((user: User) => (
+		<ul>
+			<li>{user.name}</li>
+		</ul>
+	))}
+	</div>
 	<Content />
 </BlogPost>
